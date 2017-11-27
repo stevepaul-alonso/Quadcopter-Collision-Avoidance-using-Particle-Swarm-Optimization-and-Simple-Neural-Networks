@@ -1,0 +1,25 @@
+#!/bin/bash
+#SBATCH --time=12:0:00
+#SBATCH --nodes=1
+##SBATCH --constraint=CPU-E5645
+#SBATCH --cpus-per-task=1
+#SBATCH --tasks-per-node=1
+#SBATCH --mail-user=username@buffalo.edu
+#SBATCH --mail-type=END
+#SBATCH --job-name=MATLAB
+#SBATCH --output=mdpso-%A-%a.out
+#SBATCH --error=mdpso-%A-%a.err
+#SBATCH --array=1-1000
+
+module load matlab
+ulimit -s unlimited
+
+# adjusting home directory reportedly yields a 10x MatLab speedup
+export HOME=$SLURMTMPDIR
+mkdir task_$SLURM_ARRAY_TASK_ID
+cd task_$SLURM_ARRAY_TASK_ID
+cp ../* ./
+matlab -nodisplay -r "main(${SLURM_ARRAY_TASK_ID})"
+cd ../
+rm -rf task_$SLURM_ARRAY_TASK_ID
+echo "finished"
